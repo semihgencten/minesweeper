@@ -45,11 +45,12 @@ class Game {
     this.rows = rows;
     this.cols = cols;
     this.container = document.getElementById(containerId);
-    this.cells = []; // store Cell objects
+    this.grid = []; // store Cell objects
 
     const minePositions = this.generateMines(rows, cols, mineCount);
     this.init()
     for (let r = 0; r < rows; r++) {
+      this.grid[r] = [];
       for (let c = 0; c < cols; c++) {
         const id = `${r}-${c}`;
         const isMine = minePositions.has(id);
@@ -63,8 +64,7 @@ class Game {
           onClick: (cell) => this.handleCellClick(cell),
         })
         cell.render(this.container);
-
-        this.cells.push(cell);
+        this.grid[r][c] = cell;
       }
     }
   }
@@ -87,7 +87,7 @@ class Game {
     this.container.style.display = "grid";
     this.container.style.gridTemplateColumns = `repeat(${this.cols}, 50px)`;
     this.container.style.gridTemplateRows = `repeat(${this.rows}, 50px)`;
-    this.container.style.gap = "5px";
+    this.container.style.gap = "1px";
   }
 
   handleCellClick(cell) {
@@ -102,15 +102,44 @@ class Game {
   }
 
   gameOver() {
-    // show a pop up and 
+    const modal = document.getElementById("game-over-modal");
+    modal.style.display = "flex"; // show modal (CSS flex centers it)
+
+    const restartButton = document.getElementById("restart-btn");
+    restartButton.onclick = () => {
+      modal.style.display = "none"; // hide modal
+      restartGame();
+    };
     gameOver = true;
-    console.log("game over")
-    restartGame();
   }
 
   showNeighbourMinesNumber(cell) {
+    const neighbours = this.getNeighbors(cell);
+    const mineCount = neighbours.filter(n => n.isMine).length;
+
     cell.element.style.backgroundColor = "lightblue";
-    console.log("no mine, safe")
+    cell.element.textContent = mineCount > 0 ? mineCount : "";
+  }
+
+  getNeighbors(cell) {
+    const neighbors = [];
+    const directions = [
+      [-1, -1], [-1, 0], [-1, 1],
+      [0, -1],          [0, 1],
+      [1, -1], [1, 0], [1, 1]
+    ];
+    for (let [dr, dc] of directions) {
+      const newRow = cell.row + dr;
+      const newCol = cell.col + dc;
+      if (
+        newRow >= 0 && newRow < this.rows &&
+        newCol >= 0 && newCol < this.cols
+      ) {
+        neighbors.push(this.grid[newRow][newCol]);
+      }
+    }
+
+    return neighbors;
   }
 }
 
@@ -118,6 +147,6 @@ class Game {
 
 let gameOver = false;
 const game = new Game(10, 10, 8, "game"); 
-function restartGame() {
+function restartGame() { // put this into game class
   const game = new Game(10, 10, 8, "game"); 
 }
