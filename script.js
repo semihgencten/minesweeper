@@ -4,22 +4,39 @@ class Cell {
   constructor(id, container) {
     this.id = id;             // unique identifier for the cell
     this.isRevealed = false;  // later useful in Minesweeper
+    this.isFlagged = false;
     this.isMine = false;      // later will be used
     this.element = document.createElement("div"); // DOM element
 
     this.element.classList.add("cell");
-    this.element.textContent = id;
+    // this.element.textContent = id;
 
     // Attach click behavior
     this.element.addEventListener("click", () => this.handleClick());
-
+    this.element.addEventListener('contextmenu', (e) => {
+      e.preventDefault();
+      this.handleRightClick()}
+    );
   }
 
   handleClick() {
-    if (this.isRevealed) return; // prevent multiple clicks
+    if (this.isRevealed || this.isFlagged) return; // prevent multiple clicks
     this.isRevealed = true;
     this.element.style.backgroundColor = "lightblue";
     console.log(`You clicked cell ${this.id}`);
+  }
+
+  handleRightClick() {
+    if (this.isRevealed) return;
+    this.isFlagged = !this.isFlagged; // toggle state
+
+    if (this.isFlagged) {
+      this.element.textContent = "🚩"; // show flag
+      console.log(`Cell ${this.id} flagged`);
+    } else {
+      this.element.textContent = "";   // remove flag
+      console.log(`Cell ${this.id} unflagged`);
+    }
   }
 
   render(container) {
@@ -66,4 +83,4 @@ class Game {
 }
 
 // === Start the Game ===
-const game = new Game(5, "game"); // 5×5 board in #game
+const game = new Game(10, "game"); // 5×5 board in #game
