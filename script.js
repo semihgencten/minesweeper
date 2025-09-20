@@ -1,29 +1,24 @@
 console.log("Minesweeper script loaded!");
 
 class Cell {
-  constructor(id, container) {
-    this.id = id;             // unique identifier for the cell
-    this.isRevealed = false;  // later useful in Minesweeper
+  constructor({ id, row, col, container, isMine, onClick }) {
+    console.log("cell constructor")
+    this.id = id; // unique identifier for the cell
+    this.row = row;
+    this.col = col;
+    this.isRevealed = false; // later useful in Minesweeper
     this.isFlagged = false;
-    this.isMine = false;      // later will be used
+    this.isMine = isMine; // later will be used
     this.element = document.createElement("div"); // DOM element
 
     this.element.classList.add("cell");
     // this.element.textContent = id;
 
-    // Attach click behavior
-    this.element.addEventListener("click", () => this.handleClick());
-    this.element.addEventListener('contextmenu', (e) => {
+    this.element.addEventListener("click", () => onClick(this));
+    this.element.addEventListener("contextmenu", (e) => {
       e.preventDefault();
-      this.handleRightClick()}
-    );
-  }
-
-  handleClick() {
-    if (this.isRevealed || this.isFlagged) return; // prevent multiple clicks
-    this.isRevealed = true;
-    this.element.style.backgroundColor = "lightblue";
-    console.log(`You clicked cell ${this.id}`);
+      this.handleRightClick();
+    });
   }
 
   handleRightClick() {
@@ -34,53 +29,95 @@ class Cell {
       this.element.textContent = "🚩"; // show flag
       console.log(`Cell ${this.id} flagged`);
     } else {
-      this.element.textContent = "";   // remove flag
+      this.element.textContent = ""; // remove flag
       console.log(`Cell ${this.id} unflagged`);
     }
   }
 
   render(container) {
-    container.appendChild(this.element)
+    container.appendChild(this.element);
   }
 }
 
 class Game {
-  constructor(size, containerId) {
-    this.size = size; // e.g., 5 means 5×5
+  constructor(rows, cols, mineCount, containerId) {
+    console.log("game constructor")
+    this.rows = rows;
+    this.cols = cols;
     this.container = document.getElementById(containerId);
     this.cells = []; // store Cell objects
 
-    this.init();
+    const minePositions = this.generateMines(rows, cols, mineCount);
+    this.init()
+    for (let r = 0; r < rows; r++) {
+      for (let c = 0; c < cols; c++) {
+        const id = `${r}-${c}`;
+        const isMine = minePositions.has(id);
+
+        const cell = new Cell({
+          id,
+          row: r,
+          col: c,
+          container: this.container,
+          isMine,
+          onClick: (cell) => this.handleCellClick(cell),
+        })
+        cell.render(this.container);
+
+        this.cells.push(cell);
+      }
+    }
   }
 
+  generateMines(rows, cols, mineCount) {
+    const positions = new Set();
+
+    while (positions.size < mineCount) {
+      const row = Math.floor(Math.random() * rows);
+      const col = Math.floor(Math.random() * cols);
+      positions.add(`${row}-${col}`);
+    }
+    return positions;
+  }
   init() {
     // Reset container
     this.container.innerHTML = "";
 
     // Create grid style
     this.container.style.display = "grid";
-    this.container.style.gridTemplateColumns = `repeat(${this.size}, 50px)`;
-    this.container.style.gridTemplateRows = `repeat(${this.size}, 50px)`;
+    this.container.style.gridTemplateColumns = `repeat(${this.cols}, 50px)`;
+    this.container.style.gridTemplateRows = `repeat(${this.rows}, 50px)`;
     this.container.style.gap = "5px";
-
-    // Create Cell objects
-    for (let i = 1; i <= this.size * this.size; i++) {
-      const cell = new Cell(i, this.container);
-      this.cells.push(cell);
-      cell.render(this.container);
-    }
   }
 
-  cellClicked(cell) {
-    // Game-wide logic when a cell is clicked
-    console.log(`Game knows cell ${cell.id} was clicked!`);
+  handleCellClick(cell) {
+    console.log(`You clicked cell ${cell.id}`);
+    if (cell.isRevealed || cell.isFlagged) return; // prevent multiple clicks
+    cell.isRevealed = true;
+    if(cell.isMine) {
+      this.gameOver();
+      return;
+    }
+    this.showNeighbourMinesNumber(cell);
+  }
 
-    // Later you’ll handle:
-    // - Check if it’s a mine
-    // - Reveal neighbors
-    // - Win/loss conditions
+  gameOver() {
+    // show a pop up and 
+    gameOver = true;
+    console.log("game over")
+    restartGame();
+  }
+
+  showNeighbourMinesNumber(cell) {
+    cell.element.style.backgroundColor = "lightblue";
+    console.log("no mine, safe")
   }
 }
 
 // === Start the Game ===
-const game = new Game(10, "game"); // 5×5 board in #game
+
+let gameOver = false;
+const game = new Game(10, 10, 8, "game"); 
+function restartGame() {
+  const game = new Game(10, 10, 8, "game"); 
+}
