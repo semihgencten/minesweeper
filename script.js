@@ -2,7 +2,6 @@ console.log("Minesweeper script loaded!");
 
 class Cell {
   constructor({ id, row, col, container, isMine, onClick }) {
-    console.log("cell constructor")
     this.id = id; // unique identifier for the cell
     this.row = row;
     this.col = col;
@@ -27,10 +26,8 @@ class Cell {
 
     if (this.isFlagged) {
       this.element.textContent = "🚩"; // show flag
-      console.log(`Cell ${this.id} flagged`);
     } else {
       this.element.textContent = ""; // remove flag
-      console.log(`Cell ${this.id} unflagged`);
     }
   }
 
@@ -41,17 +38,31 @@ class Cell {
 
 class Game {
   constructor(rows, cols, mineCount, containerId) {
-    console.log("game constructor")
     this.rows = rows;
     this.cols = cols;
     this.container = document.getElementById(containerId);
     this.grid = []; // store Cell objects
+    this.mineCount = mineCount;
+    this.totalSafeCellNumber = rows * cols - mineCount;
 
-    const minePositions = this.generateMines(rows, cols, mineCount);
     this.init()
-    for (let r = 0; r < rows; r++) {
+  }
+  init() {
+    // Reset container
+    this.container.innerHTML = "";
+
+    // Create grid style
+    this.container.style.display = "grid";
+    this.container.style.gridTemplateColumns = `repeat(${this.cols}, 50px)`;
+    this.container.style.gridTemplateRows = `repeat(${this.rows}, 50px)`;
+    this.container.style.gap = "1px";
+
+    const minePositions = this.generateMines(this.rows, this.cols, this.mineCount);
+    this.revealedCellsCounter = 0;
+
+    for (let r = 0; r < this.rows; r++) {
       this.grid[r] = [];
-      for (let c = 0; c < cols; c++) {
+      for (let c = 0; c < this.cols; c++) {
         const id = `${r}-${c}`;
         const isMine = minePositions.has(id);
 
@@ -69,6 +80,10 @@ class Game {
     }
   }
 
+  restartGame() {
+    this.init();
+  }
+
   generateMines(rows, cols, mineCount) {
     const positions = new Set();
 
@@ -79,19 +94,7 @@ class Game {
     }
     return positions;
   }
-  init() {
-    // Reset container
-    this.container.innerHTML = "";
-
-    // Create grid style
-    this.container.style.display = "grid";
-    this.container.style.gridTemplateColumns = `repeat(${this.cols}, 50px)`;
-    this.container.style.gridTemplateRows = `repeat(${this.rows}, 50px)`;
-    this.container.style.gap = "1px";
-  }
-
   handleCellClick(cell) {
-    console.log(`You clicked cell ${cell.id}`);
     if (cell.isRevealed || cell.isFlagged) return; // prevent multiple clicks
     if(cell.isMine) {
       this.gameOver();
@@ -107,15 +110,15 @@ class Game {
     const restartButton = document.getElementById("restart-btn");
     restartButton.onclick = () => {
       modal.style.display = "none"; // hide modal
-      restartGame();
+      this.restartGame();
     };
-    gameOver = true;
   }
 
   revealCell(cell) {
     if (cell.isRevealed) return;
 
     cell.isRevealed = true;
+    this.revealedCellsCounter += 1;
 
     const neighbours = this.getNeighbors(cell);
     const mineCount = neighbours.filter(n => n.isMine).length;
@@ -128,6 +131,11 @@ class Game {
       for(let n of neighbours) {
         this.revealCell(n);
       }
+    }
+    console.log(this.totalSafeCellNumber)
+    console.log(this.revealedCellsCounter)
+    if(this.totalSafeCellNumber == this.revealedCellsCounter) {
+      this.winGame();
     }
   }
 
@@ -160,12 +168,65 @@ class Game {
 
     return neighbors;
   }
+
+  winGame() {
+    startConfetti();
+
+    // const audio = new Audio("winner.mp3");
+    // audio.play();
+
+    setTimeout(() => {
+      const modal = document.getElementById("win-modal");
+      modal.style.display = "flex"; // show modal (CSS flex centers it)
+
+      const restartButton = document.getElementById("win-restart-btn");
+      restartButton.onclick = () => {
+        modal.style.display = "none"; // hide modal
+        stopConfetti();
+        this.restartGame();
+      };
+    }, 500);
+  }
 }
+
+
+const canvas = document.getElementById('confetti-canvas');
+const ctx = canvas.getContext('2d');
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
+let confettiPieces = [];
+function startConfetti() {
+  confettiPieces = Array.from({ length: 200 }).map(() => ({
+    x: Math.random() * canvas.width,
+    y: Math.random() * canvas.height - canvas.height,
+    r: Math.random() * 6 + 4,
+    d: Math.random() * 10 + 10,
+    color: `hsl(${Math.random() * 360}, 100%, 50%)`,
+    tilt: Math.random() * 10 - 10
+  }));
+  requestAnimationFrame(updateConfetti);
+}
+
+function updateConfetti() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  confettiPieces.forEach(p => {
+    p.y += p.d * 0.2;
+    p.x += Math.sin(p.y * 0.01);
+    ctx.beginPath();
+    ctx.fillStyle = p.color;
+    ctx.ellipse(p.x, p.y, p.r, p.r/2, p.tilt, 0, 2 * Math.PI);
+    ctx.fill();
+  });
+  if (confettiPieces.some(p => p.y < canvas.height)) {
+    requestAnimationFrame(updateConfetti);
+  }
+}
+
+function stopConfetti() {
+  confettiPieces = [];
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+}
+
 
 // === Start the Game ===
-
-let gameOver = false;
-const game = new Game(15, 15, 50, "game"); 
-function restartGame() { // put this into game class
-  const game = new Game(15, 15, 50, "game"); 
-}
+const game = new Game(2, 1, 1, "game"); 
