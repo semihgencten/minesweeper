@@ -93,12 +93,11 @@ class Game {
   handleCellClick(cell) {
     console.log(`You clicked cell ${cell.id}`);
     if (cell.isRevealed || cell.isFlagged) return; // prevent multiple clicks
-    cell.isRevealed = true;
     if(cell.isMine) {
       this.gameOver();
       return;
     }
-    this.showNeighbourMinesNumber(cell);
+    this.revealCell(cell);
   }
 
   gameOver() {
@@ -113,12 +112,32 @@ class Game {
     gameOver = true;
   }
 
-  showNeighbourMinesNumber(cell) {
+  revealCell(cell) {
+    if (cell.isRevealed) return;
+
+    cell.isRevealed = true;
+
     const neighbours = this.getNeighbors(cell);
     const mineCount = neighbours.filter(n => n.isMine).length;
 
+    if(mineCount > 0) {
+      this.showNeighbourMinesNumber(cell, mineCount);
+    }
+    else {
+      this.showEmptyCell(cell);
+      for(let n of neighbours) {
+        this.revealCell(n);
+      }
+    }
+  }
+
+  showNeighbourMinesNumber(cell, mineCount) {
     cell.element.style.backgroundColor = "lightblue";
     cell.element.textContent = mineCount > 0 ? mineCount : "";
+  }
+
+  showEmptyCell(cell) {
+    cell.element.style.backgroundColor = "lightblue";
   }
 
   getNeighbors(cell) {
@@ -146,7 +165,7 @@ class Game {
 // === Start the Game ===
 
 let gameOver = false;
-const game = new Game(10, 10, 8, "game"); 
+const game = new Game(15, 15, 50, "game"); 
 function restartGame() { // put this into game class
-  const game = new Game(10, 10, 8, "game"); 
+  const game = new Game(15, 15, 50, "game"); 
 }
