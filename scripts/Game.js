@@ -2,13 +2,14 @@ import Cell from './Cell.js'
 import Confetti from './animations.js';
 
 export default class Game {
-  constructor(rows, cols, mineCount, containerId) {
+  constructor(rows, cols, mineCount, containerId, onRestart) {
     this.rows = rows;
     this.cols = cols;
     this.container = document.getElementById(containerId);
     this.grid = []; // store Cell objects
     this.mineCount = mineCount;
     this.totalSafeCellNumber = rows * cols - mineCount;
+    this.onRestart = onRestart; // callback to show level selection
 
     this.constructGrid()
   }
@@ -40,6 +41,8 @@ export default class Game {
         })
         cell.render(this.container);
         this.grid[r][c] = cell;
+
+        this.applyDiagonalOpacity(cell, r, c);
       }
     }
   }
@@ -66,9 +69,28 @@ export default class Game {
       }
     }
   }
+  applyDiagonalOpacity(cell, row, col) {
+    // Calculate which diagonal the cell belongs to
+    // Cells on the same diagonal have the same (row + col) value
+    const diagonalIndex = (row + col) % 2;
+    
+    let opacity;
+    switch(diagonalIndex) {
+      case 0:
+        opacity = 1.0;   // 100% opacity
+        break;
+      case 1:
+        opacity = 0.50;  // 75% opacity
+        break;
+    }
+    
+    // Apply blue background with calculated opacity
+    cell.element.style.backgroundColor = `rgba(173, 216, 230, ${opacity})`; // Light blue with varying opacity
+  }
 
   restartGame() {
-    this.constructGrid()
+    // Show level selection instead of restarting with same parameters
+    this.onRestart();
   }
 
   generateMines({ rows, cols, mineCount, firstRevealedCellRow, firstRevealedCellCol }) {
@@ -150,12 +172,32 @@ export default class Game {
   }
 
   showNeighbourMinesNumber(cell, mineCount) {
-    cell.element.style.backgroundColor = "lightblue";
+    // Set color based on mine count
+    let backgroundColor;
+    switch(mineCount) {
+      case 1:
+        backgroundColor = "rgba(128, 0, 128, 0.6)"; // purple with 60% opacity
+        break;
+      case 2:
+        backgroundColor = "rgba(255, 255, 0, 0.6)"; // yellow with 60% opacity
+        break;
+      case 3:
+        backgroundColor = "rgba(255, 165, 0, 0.6)"; // orange with 60% opacity
+        break;
+      case 4:
+        backgroundColor = "rgba(255, 0, 0, 0.6)"; // red with 60% opacity
+        break;
+      default: // 5 and above
+        backgroundColor = "rgba(255, 192, 203, 0.7)"; // pink with 70% opacity
+        break;
+    }
+    
+    cell.element.style.backgroundColor = backgroundColor;
     cell.element.textContent = mineCount > 0 ? mineCount : "";
   }
 
   showEmptyCell(cell) {
-    cell.element.style.backgroundColor = "lightblue";
+    cell.element.style.backgroundColor = "gray";
   }
 
   getNeighbors(cell) {
