@@ -39,12 +39,13 @@ This project is a learning exercise to practice DOM manipulation, object-oriente
 ---
 
 ## How to Play
-1. Open `index.html` in your browser.
-2. Left-click a cell:
+1. in a terminal run the command "python -m http.server 8000"
+2. go to http://localhost:8080/ in your browser
+3. Left-click a cell:
    - If it’s a mine 💣 → Game Over.
    - Otherwise, it reveals the number of adjacent mines.
-3. Right-click a cell to toggle a 🚩 flag.
-4. Clear all non-mine cells to win 🎉.
+4. Right-click a cell to toggle a 🚩 flag.
+5. Clear all non-mine cells to win 🎉.
 
 ---
 
