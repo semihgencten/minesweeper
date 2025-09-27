@@ -33,11 +33,11 @@ Go to the website https://semihgencten.github.io/minesweeper/ and enjoy!
 
 ## How It Works
 The game is built with a modular, object-oriented design:
-  Game class → Controls the overall game flow, initializes the grid, manages win/lose logic, and tracks progress.
-  Cell class → Represents each grid cell, handling its state (hidden, revealed, flagged, or mined) and rendering.
-  Animation/Effects module → Keeps visual effects (like confetti) separate from the core logic.
+- Game class → Controls the overall game flow, initializes the grid, manages win/lose logic, and tracks progress.
+- Cell class → Represents each grid cell, handling its state (hidden, revealed, flagged, or mined) and rendering.
+- Animation/Effects module → Keeps visual effects (like confetti) separate from the core logic.
   
-This separation of concerns makes the code easier to understand, extend, and debug.
+This separation of concerns makes the code easier to understand, extend, and debug.  
 The Game handles rules, the Cell handles behavior, and animations stay independent of gameplay logic.
 
 ---
