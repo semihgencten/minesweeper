@@ -98,8 +98,8 @@ export default class Game {
 
     // Build forbidden zone: first cell + its neighbors
     const forbidden = new Set();
-    for (let dr = -1; dr <= 1; dr++) {
-      for (let dc = -1; dc <= 1; dc++) {
+    for (let dr = -2; dr <= 2; dr++) {
+      for (let dc = -2; dc <= 2; dc++) {
         const r = firstRevealedCellRow + dr;
         const c = firstRevealedCellCol + dc;
         if (r >= 0 && r < rows && c >= 0 && c < cols) {

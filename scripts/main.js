@@ -1,12 +1,12 @@
 import Game from './Game.js';
-console.log("Minesweeper script loaded!");
+console.log("main.js worked!");
 
 // Define difficulty levels
 const DIFFICULTY_LEVELS = {
   easy: { rows: 8, cols: 10, mineCount:10 },
   medium: { rows: 10, cols: 12, mineCount: 16 },
   hard: { rows: 12, cols: 14, mineCount: 35 },
-  expert: { rows: 16, cols: 18, mineCount: 120 }
+  expert: { rows: 16, cols: 18, mineCount: 100 }
 };
 
 let currentGame = null;
