@@ -122,7 +122,6 @@ export default class Game {
     return positions;
   }
   handleCellClick(cell) {
-    console.log()
     if (cell.isRevealed || cell.isFlagged) return; // prevent multiple clicks
     if(cell.isMine) {
       this.gameOver();
