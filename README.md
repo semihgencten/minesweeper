@@ -10,7 +10,7 @@ Go to the website https://semihgencten.github.io/minesweeper/ and enjoy!
 
 ## How to run on a local environment
 1. in a terminal run the command "python -m http.server 8000"
-2. go to http://localhost:8080/ in your browser
+2. go to http://localhost:8000/ in your browser
 
 ## How to play
 1. Left-click a cell:

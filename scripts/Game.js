@@ -10,13 +10,16 @@ export default class Game {
     this.mineCount = mineCount;
     this.totalSafeCellNumber = rows * cols - mineCount;
     this.onRestart = onRestart; // callback to show level selection
+    this.timerInterval = null;
+    this.startTime = null;
+    this.elapsedTime = 0; // in seconds
+    this.isTimerRunning = false;
 
     this.constructGrid()
   }
 
   constructGrid() {
     // Reset container
-    console.log("construct grid")
     this.container.innerHTML = "";
 
     // Create grid style
@@ -61,8 +64,6 @@ export default class Game {
         const id = `${r}-${c}`;
         const isMine = minePositions.has(id);
         if(minePositions.has(id)) {
-          console.log(this.grid[r][c])
-          console.log(typeof this.grid[r][c])
           const cell = this.grid[r][c]
           cell.isMine = true
         }
@@ -91,6 +92,7 @@ export default class Game {
   restartGame() {
     // Show level selection instead of restarting with same parameters
     this.onRestart();
+    this.resetTimer()
   }
 
   generateMines({ rows, cols, mineCount, firstRevealedCellRow, firstRevealedCellCol }) {
@@ -131,6 +133,7 @@ export default class Game {
   }
 
   gameOver() {
+    this.stopTimer()
     const modal = document.getElementById("game-over-modal");
     modal.style.display = "flex"; // show modal (CSS flex centers it)
 
@@ -144,6 +147,7 @@ export default class Game {
   revealCell(cell) {
     if (cell.isRevealed) return;
     if (this.revealedCellsCounter == 0) {
+      this.startTimer()
       this.locateMines(cell.row, cell.col)
     }
 
@@ -163,8 +167,7 @@ export default class Game {
       }
     }
   
-    console.log("totalSafeCellNumber ",this.totalSafeCellNumber)
-    console.log("revealedCellsCounter ",this.revealedCellsCounter)
+
     if(this.totalSafeCellNumber == this.revealedCellsCounter) {
       this.winGame();
     }
@@ -236,4 +239,35 @@ export default class Game {
       };
     }, 500);
   }
+
+  startTimer() {
+    if (this.isTimerRunning) return; // prevent multiple timers
+
+    this.isTimerRunning = true;
+    this.startTime = Date.now();
+
+    const timerDisplay = document.getElementById("timer");
+    timerDisplay.textContent = "0"; // reset timer display
+
+    this.timerInterval = setInterval(() => {
+      const now = Date.now();
+      this.elapsedTime = Math.floor((now - this.startTime) / 1000);
+      timerDisplay.textContent = this.elapsedTime;
+    }, 1000);
+  }
+
+  stopTimer() {
+    if (!this.isTimerRunning) return;
+
+    clearInterval(this.timerInterval);
+    this.isTimerRunning = false;
+  }
+
+  resetTimer() {
+    this.stopTimer();
+    this.elapsedTime = 0;
+    const timerDisplay = document.getElementById("timer");
+    timerDisplay.textContent = "0";
+  }
+
 }
